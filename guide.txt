@@ -1,0 +1,11 @@
+1. node.js설치(최신버전)
+2. 만들고 싶은 위치에 폴더 생성 후 거기 터미널 들어가서 vue설치: npm install -g @vue/cli
+=>설치 완료
+3. 그 폴더 안에서 git clone https://github.com/hyunj24/my_team_blog.git 명령어 실행
+4. vue create my_team_blog // git clone받은 path에 설치
+    1) 설치 시 merge선택
+    2) vue2랑 vue3 중 vue3 선택 (가장 최신 버전)
+5. npm run serve 실행 후 브라우저 localhost:8080 로 블로그 페이지 확인
+(이 밑은은 Docker로 실행하는 법, 근데 5분 정도 걸릴 수 있음)
+6. docker 엔진 켜고 docker-compose build 실행 
+7. docker-compose up -d 실행 후 브라우저 localhost:8080 로 블로그 페이지 확인
