@@ -1,6 +1,5 @@
 # PowerShell 스크립트 - deploy_vue_app.ps1
-# npm i -g jest
-# npm install --save-dev jest vue3-jest babel-jest @babel/preset-env
+# npm install -g --save-dev jest vue3-jest babel-jest @babel/preset-env @vue/test-utils
 
 Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
 
