@@ -1,4 +1,4 @@
-name: CI
+name: Vue.js CI
 
 on:
   push:
@@ -7,6 +7,26 @@ on:
     branches: [ "main" ]
 
 jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '14'
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Install mitt
+      run: npm install mitt
+
+    - name: Run tests
+      run: npm test
   build:
     runs-on: ubuntu-latest
     
@@ -21,6 +41,9 @@ jobs:
 
     - name: Install dependencies
       run: npm install
+
+    - name: Install mitt
+      run: npm install mitt
 
     - name: Build Vue.js application
       run: npm run build
@@ -39,5 +62,11 @@ jobs:
         docker build -t ${{ secrets.DOCKER_USERNAME }}/vue-app:latest .
         docker push ${{ secrets.DOCKER_USERNAME }}/vue-app:latest
     
+    - name: Install Docker Compose
+      run: |
+        sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+        sudo chmod +x /usr/local/bin/docker-compose
+        docker-compose version
+
     - name: Set up Docker Compose
       run: docker-compose -f docker-compose.yml up -d --build
