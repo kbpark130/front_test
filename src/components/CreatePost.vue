@@ -19,6 +19,7 @@ export default {
   },
   methods: {
     createPost() {
+      // Post ���� ���� (���÷� Local Storage ���)
       const posts = JSON.parse(localStorage.getItem('posts')) || [];
       const newPost = {
         id: Date.now(),

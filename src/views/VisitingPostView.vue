@@ -58,7 +58,7 @@ export default {
       newComment: '',
       editMode: null,
       editedComment: '',
-      currentUser: '',
+      currentUser: localStorage.getItem('currentUser') || '', // 초기값 설정
       isLiking: false // 좋아요 처리 상태 확인
     };
   },
@@ -168,13 +168,18 @@ export default {
     },
     navigateToEdit() {
       this.$router.push({
-        name: 'EditPost',
-        params: { id: this.post.id },
+        name: 'NewPost',  // NewPostView.vue로 라우팅
+        query: {
+          id: this.post.postId, // ID를 query로 전달
+          title: this.post.title,
+          restaurant: this.post.restaurant,
+          content: this.post.content,
+        },
       });
     },
     deletePost() {
       if (confirm('정말로 이 글을 삭제하시겠습니까?')) {
-        axios.delete(`http://localhost:8080/posts/${this.post.id}`, {
+        axios.delete(`http://localhost:8080/posts/${this.post.postId}/delete`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
           },

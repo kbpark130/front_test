@@ -8,7 +8,7 @@ Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
 # minikube start
 
 # vue-app 실패인 상태면
-kubectl delete service vue-app
+kubectl delete service vue-app-service
 kubectl delete deployment vue-app
 
 # vue-app 명시적인 포트 설정 및 실행

@@ -34,18 +34,13 @@ import axios from 'axios';
 //import { EventBus } from '@/utils/eventBus';
 
 export default {
-  props: {
-    postId: {
-      type: String,
-      default: null, // null일 경우 새 글 작성 모드로 간주
-    },
-  },
   data() {
-    return {
-      localTitle: '',
-      localPhotos: [],
-      localBusinessName: '',
-      localContent: '',
+      return {
+      localTitle: this.$route.query.title || '', // 쿼리로 전달된 제목
+      localBusinessName: this.$route.query.restaurant || '', // 쿼리로 전달된 상호명
+      localContent: this.$route.query.content || '', // 쿼리로 전달된 본문
+      postId: this.$route.query.id || null, // 쿼리로 전달된 postId
+      localPhotos: [], // 사진은 수정 불가능
     };
   },
   computed: {
@@ -58,22 +53,30 @@ export default {
         : '사진을 선택해주세요.';
     },
   },
-  async created() {
+  created() {
+    console.log('postId from query:', this.$route.query.id); // postId 확인
+    this.postId = this.$route.query.id || null;
     if (this.isEditMode) {
-      await this.loadPostData();
+      this.loadPostData();
     }
   },
   methods: {
     goBack() {
       this.$router.push('/posts');
     },
-    handlePhotoUpload(event) {
-      const files = Array.from(event.target.files);
-      if (files.length > 2) {
-        alert('사진은 최대 2개까지 업로드할 수 있습니다.');
-        return;
+    handlePhotoUpload() {
+      // 수정 모드에서는 사진을 업로드할 수 없으므로 알림을 표시
+      if (this.isEditMode) {
+        alert('사진 수정은 불가능합니다. 기존 사진만 유지됩니다.');
+      } else {
+        // 새 글 작성 시 사진 업로드 처리
+        const files = Array.from(event.target.files);
+        if (files.length > 2) {
+          alert('사진은 최대 2개까지 업로드할 수 있습니다.');
+          return;
+        }
+        this.localPhotos = files;
       }
-      this.localPhotos = files;
     },
     async loadPostData() {
       try {
@@ -82,64 +85,64 @@ export default {
             Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
           },
         });
-        const post = response.data;
-
-        this.localTitle = post.title;
-        this.localPhotos = post.images || [];
-        this.localBusinessName = post.restaurant;
-        this.localContent = post.content;
+        const postData = response.data;
+        this.localTitle = postData.title;
+        this.localBusinessName = postData.restaurant;
+        this.localContent = postData.content;
+        // 추가적으로 필요한 데이터가 있다면 여기서 처리
       } catch (error) {
-        console.error('게시글 데이터를 불러오는 중 오류가 발생했습니다:', error);
-        alert('게시글 데이터를 불러오는 중 오류가 발생했습니다. 다시 시도해주세요.');
+        console.error('Error fetching post data:', error);
       }
     },
     async submitPost() {
-        const formData = new FormData();
+      const formData = new FormData();
 
-        const post = {
-          title: this.localTitle,
-          content: this.localContent,
-          restaurant: this.localBusinessName,
-          hashTagIds: this.localHashTags || [] 
-        };
+      const post = {
+        title: this.localTitle,
+        content: this.localContent,
+        restaurant: this.localBusinessName,
+      };
 
-    formData.append('post', new Blob([JSON.stringify(post)], { type: 'application/json' }));
-
-    this.localPhotos.forEach((photo) => {
-    formData.append('images', photo);
-    });
-
-    const url = this.isEditMode
-      ? `http://localhost:8080/posts/${this.id}/update`
-      : 'http://localhost:8080/posts/create';
-
-    const method = this.isEditMode ? 'put' : 'post';
-
-    try {
-      // Axios 요청 로그 출력
-      console.log('Authorization:', `Bearer ${localStorage.getItem('accessToken')}`);
-      console.log('URL:', url);
-      console.log('Method:', method);
-      console.log('FormData:', formData);
-
-      await axios({
-        method,
-        url,
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          Authorization: `Bearer ${localStorage.getItem('accessToken')}`, // Bearer 토큰 설정
-        },
-        data: formData,
-      });
-
-      alert(this.isEditMode ? '글 수정이 완료되었습니다!' : '글 작성이 완료되었습니다!');
-      this.$router.push('/posts');
-      } catch (error) {
-      console.error('오류가 발생했습니다:', error);
-      alert('오류가 발생했습니다. 다시 시도해주세요.');
+      // 새로운 글 작성일 때
+      if (!this.isEditMode) {
+        // 해시태그가 없다면 빈 배열로 보내기
+        post.hashTagIds = this.localHashTags || [];
       }
-    }
-  },
+
+      formData.append('post', new Blob([JSON.stringify(post)], { type: 'application/json' }));
+
+      // 사진은 수정 불가능하므로, 수정 모드일 때만 사진을 추가합니다.
+      if (this.isEditMode) {
+        this.localPhotos.forEach((photo) => {
+          formData.append('images', photo);
+        });
+      }
+
+      const url = this.isEditMode
+        ? `http://localhost:8080/posts/${this.postId}/update` // 수정 요청 URL
+        : 'http://localhost:8080/posts/create'; // 새로운 글 작성 요청 URL
+
+      const method = this.isEditMode ? 'put' : 'post';
+
+      try {
+        await axios({
+          method,
+          url,
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+          },
+          data: formData,
+        });
+
+        alert(this.isEditMode ? '글 수정이 완료되었습니다!' : '글 작성이 완료되었습니다!');
+        this.$router.push('/posts');
+      } catch (error) {
+        console.error('오류가 발생했습니다:', error);
+        alert('오류가 발생했습니다. 다시 시도해주세요.');
+      }
+    },
+  }
 };
 </script>
 
