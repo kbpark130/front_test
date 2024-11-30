@@ -11,15 +11,20 @@ Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
 kubectl delete service vue-app
 kubectl delete deployment vue-app
 
+# vue-app 명시적인 포트 설정 및 실행
+kubectl apply -f deployment.yaml
+kubectl apply -f service.yaml
+kubectl port-forward service/vue-app-service 8081:8081
+
 # Vue 앱 배포 생성
-kubectl create deployment vue-app --image=kbpark130/vue-app
+#kubectl create deployment vue-app --image=kbpark130/vue-app
 
 # Vue 앱 서비스 노출
-kubectl expose deployment vue-app --type=LoadBalancer --port=8081 --name=vue-app
+#kubectl expose deployment vue-app --type=LoadBalancer --port=8081 --name=vue-app
 
 # Vue 앱 서비스 열기
 # minikube dashboard
-# minikube service vue-app
+# minikube service vue-app-service
 
 # 끝낼 때
 # minikube stop
