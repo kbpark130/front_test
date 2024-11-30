@@ -14,7 +14,8 @@ kubectl delete deployment vue-app
 # vue-app 명시적인 포트 설정 및 실행
 kubectl apply -f deployment.yaml
 kubectl apply -f service.yaml
-kubectl port-forward service/vue-app-service 8081:8081
+# 실행될 때까지 대기 후 port-forward를 하면되지만 로그인이 안됨
+#kubectl port-forward service/vue-app-service 8081:8081
 
 # Vue 앱 배포 생성
 #kubectl create deployment vue-app --image=kbpark130/vue-app
