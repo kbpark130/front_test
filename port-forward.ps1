@@ -1,0 +1,1 @@
+kubectl port-forward service/vue-app-service 8081:8081
